@@ -10,7 +10,17 @@
 #include <libavcodec/avcodec.h>
 #include <libavformat/avformat.h>
 #include <libswscale/swscale.h>
+#include "SDL.h"
+#undef main
+#include "SDL_thread.h"
 #include <assert.h>
+
+
+// compatibility with newer API
+#if LIBAVCODEC_VERSION_INT < AV_VERSION_INT(55,28,1)
+#define av_frame_alloc avcodec_alloc_frame
+#define av_frame_free avcodec_free_frame
+#endif
 
 #define defer_merge(a,b) a##b
 #define defer_varname(a) defer_merge(defer_scopevar_, a)
@@ -44,7 +54,13 @@ static let nil = NULL;
 void saveFrame(const AVFrame* const frame, const int width, const int height, const int iFrame);
 
 
-int main(int argc, const char * argv[]) {
+int main(int argc, const char* argv[]) {
+    
+    guard (SDL_Init(SDL_INIT_VIDEO | SDL_INIT_AUDIO | SDL_INIT_TIMER) == noErr) else {
+        fprintf(stderr, "Could not initialize SDL - %s\n", SDL_GetError());
+        return -1;
+    }
+    
     
     let fileName = "bunny.mp4";
     
@@ -58,9 +74,7 @@ int main(int argc, const char * argv[]) {
     
     assert(formatContext != nil);
     
-    defer {
-        avformat_close_input((AVFormatContext** )&formatContext);
-    };
+    defer { avformat_close_input((AVFormatContext** )&formatContext); };
     
     guard (avformat_find_stream_info(formatContext, nil) == noErr) else {
         return -1;
@@ -85,9 +99,7 @@ int main(int argc, const char * argv[]) {
     
     let codecContextOriginal = formatContext -> streams[videoStream] -> codec;
     
-    defer {
-        avcodec_close(codecContextOriginal);
-    };
+    defer { avcodec_close(codecContextOriginal); };
     
     let codec = avcodec_find_decoder(codecContextOriginal -> codec_id);
     
@@ -98,9 +110,7 @@ int main(int argc, const char * argv[]) {
     
     let codecContext = avcodec_alloc_context3(codec);
     
-    defer {
-        avcodec_close(codecContext);
-    };
+    defer { avcodec_close(codecContext); };
     
     guard (avcodec_copy_context(codecContext, codecContextOriginal) == noErr) else {
         fprintf(stderr, "Couldn't copy codec context\n");
@@ -115,6 +125,13 @@ int main(int argc, const char * argv[]) {
     
     let videoHeight = codecContext -> height;
     
+    let screen = SDL_SetVideoMode(videoWidth, videoHeight, 24, 0);
+    
+    guard(screen != nil) else {
+        return -1;
+    }
+    
+    
     let targetFormat = AV_PIX_FMT_RGB24;
     
     let frame = av_frame_alloc();
@@ -122,26 +139,20 @@ int main(int argc, const char * argv[]) {
     if(frame == nil) {
         return -1;
     }
-    defer {
-        av_free(frame);
-    };
+    defer { av_free(frame); };
     
     let frameRGB = av_frame_alloc();
     
     if(frameRGB == nil) {
         return -1;
     }
-    defer {
-        av_free(frameRGB);
-    };
+    defer { av_free(frameRGB); };
     
     let numBytes = avpicture_get_size(targetFormat, videoWidth, videoHeight);
     
     let buffer = (uint8_t*)av_malloc(numBytes * sizeof(uint8_t));
     
-    defer {
-        av_free(buffer);
-    };
+    defer { av_free(buffer); };
     
     guard (avpicture_fill((AVPicture* )frameRGB, buffer, targetFormat, videoWidth, videoHeight) > 0) else {
         return -1;
@@ -149,17 +160,17 @@ int main(int argc, const char * argv[]) {
     
     let swsContext = sws_getContext(videoWidth, videoHeight, codecContext -> pix_fmt, videoWidth, videoHeight, targetFormat, SWS_BILINEAR, nil, nil, nil);
     
+    let bmp = SDL_CreateYUVOverlay(videoWidth, videoHeight, SDL_YV12_OVERLAY, screen);
+    
     int hasFrameFinished = 0;
     
     AVPacket packet = { 0 };
     
-    var frameIndex = 0;
+//    var frameIndex = 0;
     
     while(av_read_frame(formatContext, &packet) == noErr) {
         
-        defer {
-            av_free_packet((AVPacket*)&packet);
-        };
+        defer { av_free_packet((AVPacket*)&packet); };
         
         guard (packet.stream_index == videoStream) else {
             continue;
@@ -173,17 +184,26 @@ int main(int argc, const char * argv[]) {
             continue;
         }
         
-        guard (sws_scale(swsContext, (const uint8_t * const * )frame -> data,
-                         frame -> linesize, 0,
-                         videoHeight, frameRGB -> data, frameRGB -> linesize) > 0) else {
-            return -1;
-        }
+        SDL_LockYUVOverlay(bmp);
         
-        frameIndex += 1;
+        defer { SDL_UnlockYUVOverlay(bmp); };
         
-        if(frameIndex <= 5) {
-            saveFrame(frameRGB, videoWidth, videoHeight, frameIndex);
-        }
+        const AVPicture picture = {
+            .data = {
+                [0] = bmp -> pixels[0],
+                [1] = bmp -> pixels[0],
+                [2] = bmp -> pixels[0],
+            },
+            .linesize = {
+                [0] = bmp -> pitches[0],
+                [1] = bmp -> pitches[2],
+                [2] = bmp -> pitches[1],
+            }
+        };
+        
+        sws_scale(swsContext, (const uint8_t * const * )frame->data,
+                  frame->linesize, 0, videoHeight,
+                  picture.data, picture.linesize);
         
     }
     

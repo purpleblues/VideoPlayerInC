@@ -11,6 +11,7 @@
 		F62E0A7D21357B70003AE064 /* libavcodec.a in Frameworks */ = {isa = PBXBuildFile; fileRef = F62E0A7C21357B70003AE064 /* libavcodec.a */; };
 		F62E0A7F21357B7E003AE064 /* libavformat.a in Frameworks */ = {isa = PBXBuildFile; fileRef = F62E0A7E21357B7E003AE064 /* libavformat.a */; };
 		F62E0A8121357BD3003AE064 /* libswscale.a in Frameworks */ = {isa = PBXBuildFile; fileRef = F62E0A8021357BD3003AE064 /* libswscale.a */; };
+		F62E0A8421359FC5003AE064 /* libSDL.a in Frameworks */ = {isa = PBXBuildFile; fileRef = F62E0A8321359FC5003AE064 /* libSDL.a */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXCopyFilesBuildPhase section */
@@ -32,6 +33,7 @@
 		F62E0A7E21357B7E003AE064 /* libavformat.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; name = libavformat.a; path = ../../../../../../usr/local/Cellar/ffmpeg/4.0.2/lib/libavformat.a; sourceTree = "<group>"; };
 		F62E0A8021357BD3003AE064 /* libswscale.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; name = libswscale.a; path = ../../../../../../usr/local/Cellar/ffmpeg/4.0.2/lib/libswscale.a; sourceTree = "<group>"; };
 		F62E0A8221357C64003AE064 /* bunny.mp4 */ = {isa = PBXFileReference; lastKnownFileType = file; path = bunny.mp4; sourceTree = "<group>"; };
+		F62E0A8321359FC5003AE064 /* libSDL.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; name = libSDL.a; path = ../../../../../../usr/local/Cellar/sdl/1.2.15/lib/libSDL.a; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -39,6 +41,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				F62E0A8421359FC5003AE064 /* libSDL.a in Frameworks */,
 				F62E0A7F21357B7E003AE064 /* libavformat.a in Frameworks */,
 				F62E0A7D21357B70003AE064 /* libavcodec.a in Frameworks */,
 				F62E0A8121357BD3003AE064 /* libswscale.a in Frameworks */,
@@ -77,6 +80,7 @@
 		F62E0A7B21357B70003AE064 /* Frameworks */ = {
 			isa = PBXGroup;
 			children = (
+				F62E0A8321359FC5003AE064 /* libSDL.a */,
 				F62E0A8021357BD3003AE064 /* libswscale.a */,
 				F62E0A7E21357B7E003AE064 /* libavformat.a */,
 				F62E0A7C21357B70003AE064 /* libavcodec.a */,
@@ -261,28 +265,40 @@
 		F62E0A7921357ABF003AE064 /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
+				CODE_SIGN_IDENTITY = "Mac Developer";
 				CODE_SIGN_STYLE = Automatic;
 				DEVELOPMENT_TEAM = JV6A999PY8;
-				HEADER_SEARCH_PATHS = "/usr/local/Cellar/ffmpeg/4.0.2/include/**";
+				HEADER_SEARCH_PATHS = (
+					"/usr/local/Cellar/ffmpeg/4.0.2/include/**",
+					"/usr/local/Cellar/sdl/1.2.15/include/SDL/**",
+				);
 				LIBRARY_SEARCH_PATHS = (
 					"$(inherited)",
 					/usr/local/Cellar/ffmpeg/4.0.2/lib,
+					/usr/local/Cellar/sdl/1.2.15/lib,
 				);
 				PRODUCT_NAME = "$(TARGET_NAME)";
+				PROVISIONING_PROFILE_SPECIFIER = "";
 			};
 			name = Debug;
 		};
 		F62E0A7A21357ABF003AE064 /* Release */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
+				CODE_SIGN_IDENTITY = "Mac Developer";
 				CODE_SIGN_STYLE = Automatic;
 				DEVELOPMENT_TEAM = JV6A999PY8;
-				HEADER_SEARCH_PATHS = "/usr/local/Cellar/ffmpeg/4.0.2/include/**";
+				HEADER_SEARCH_PATHS = (
+					"/usr/local/Cellar/ffmpeg/4.0.2/include/**",
+					"/usr/local/Cellar/sdl/1.2.15/include/SDL/**",
+				);
 				LIBRARY_SEARCH_PATHS = (
 					"$(inherited)",
 					/usr/local/Cellar/ffmpeg/4.0.2/lib,
+					/usr/local/Cellar/sdl/1.2.15/lib,
 				);
 				PRODUCT_NAME = "$(TARGET_NAME)";
+				PROVISIONING_PROFILE_SPECIFIER = "";
 			};
 			name = Release;
 		};
