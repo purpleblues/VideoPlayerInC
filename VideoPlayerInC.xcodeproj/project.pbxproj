@@ -277,6 +277,7 @@
 					/usr/local/Cellar/ffmpeg/4.0.2/lib,
 					/usr/local/Cellar/sdl/1.2.15/lib,
 				);
+				OTHER_LDFLAGS = "";
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				PROVISIONING_PROFILE_SPECIFIER = "";
 			};
@@ -297,6 +298,7 @@
 					/usr/local/Cellar/ffmpeg/4.0.2/lib,
 					/usr/local/Cellar/sdl/1.2.15/lib,
 				);
+				OTHER_LDFLAGS = "";
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				PROVISIONING_PROFILE_SPECIFIER = "";
 			};
